@@ -2,11 +2,31 @@ use pyo3::ffi::*;
 use std::os::raw::{c_int, c_uint, c_void};
 use std::ptr::null_mut;
 
+use crate::typeref::EXT_TYPE;
+
 #[repr(C)]
 pub struct PyExt {
     pub ob_base: PyObject,
     pub tag: *mut PyObject,
     pub data: *mut PyObject,
+}
+
+impl PyExt {
+    pub(crate) fn create(tag: *mut PyObject, data: *mut PyObject) -> *mut PyObject {
+        unsafe {
+            let obj = _PyObject_New(EXT_TYPE);
+            if obj.is_null() {
+                return null_mut();
+            }
+            Py_INCREF(tag);
+            (*(obj as *mut PyExt)).tag = tag;
+            Py_INCREF(data);
+            (*(obj as *mut PyExt)).data = data;
+
+            PyObject_Init(obj, EXT_TYPE);
+            obj
+        }
+    }
 }
 
 #[no_mangle]

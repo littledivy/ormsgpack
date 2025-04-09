@@ -17,9 +17,11 @@ mod ext;
 mod ffi;
 mod msgpack;
 mod opt;
-mod serialize;
+pub(crate) mod serialize;
 mod typeref;
 mod unicode;
+
+mod langgraph_default;
 
 use pyo3::ffi::*;
 use std::ffi::CStr;
@@ -50,7 +52,7 @@ macro_rules! module_add_int {
 #[no_mangle]
 #[cold]
 pub unsafe extern "C" fn PyInit_ormsgpack() -> *mut PyModuleDef {
-    let methods: Box<[PyMethodDef; 3]> = Box::new([
+    let methods: Box<[PyMethodDef; 4]> = Box::new([
         PyMethodDef {
             ml_name: c"packb".as_ptr(),
             ml_meth: PyMethodDefPointer {
@@ -66,6 +68,14 @@ pub unsafe extern "C" fn PyInit_ormsgpack() -> *mut PyModuleDef {
             },
             ml_flags: METH_FASTCALL | METH_KEYWORDS,
             ml_doc: UNPACKB_DOC.as_ptr(),
+        },
+        PyMethodDef {
+            ml_name: c"_msgpack_default".as_ptr(),
+            ml_meth: PyMethodDefPointer {
+                PyCFunctionFastWithKeywords: crate::langgraph_default::msgpack_default,
+            },
+            ml_flags: METH_FASTCALL | METH_KEYWORDS,
+            ml_doc: c"Internal function".as_ptr(),
         },
         PyMethodDef::zeroed(),
     ]);
@@ -152,7 +162,7 @@ fn raise_unpackb_exception(msg: &str) -> *mut PyObject {
 
 #[cold]
 #[inline(never)]
-fn raise_packb_exception(msg: &str) -> *mut PyObject {
+pub(crate) fn raise_packb_exception(msg: &str) -> *mut PyObject {
     unsafe {
         let err_msg =
             PyUnicode_FromStringAndSize(msg.as_ptr() as *const c_char, msg.len() as isize);

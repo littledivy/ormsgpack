@@ -13,10 +13,10 @@ mod list;
 mod memoryview;
 mod numpy;
 mod pydantic;
-mod serializer;
-mod str;
+pub(crate) mod serializer;
+pub(crate) mod str;
 mod tuple;
 mod uuid;
-mod writer;
+pub(crate) mod writer;
 
 pub use serializer::serialize;

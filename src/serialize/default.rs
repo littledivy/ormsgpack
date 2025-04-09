@@ -59,6 +59,12 @@ impl Serialize for Default {
                     std::ptr::null_mut() as *mut pyo3::ffi::PyObject
                 ));
                 if unlikely!(default_obj.is_null()) {
+                    dbg!(default_obj);
+                    // print exception
+                    let err = unsafe { pyo3::ffi::PyErr_Occurred() };
+                    if !err.is_null() {
+                        unsafe { pyo3::ffi::PyErr_Print() };
+                    }
                     err!(format_err(self.ptr))
                 } else {
                     let res = PyObject::new(

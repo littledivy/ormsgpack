@@ -21,12 +21,14 @@ from .ormsgpack import (
     __version__,
     packb,
     unpackb,
+    _msgpack_default,
 )
 
 __all__ = (
     "__version__",
     "packb",
     "unpackb",
+    "_msgpack_default",
     "Ext",
     "MsgpackDecodeError",
     "MsgpackEncodeError",
